@@ -8,7 +8,7 @@ atributos.add_argument('login', type=str, required=True, help="LOGIN_CANNOT_BE_N
 atributos.add_argument('senha', type=str, required=True, help="PASSWORD_CANNOT_BE_NULL")
 
 class Usuario(Resource):
-   # /usuarios/user_id
+   # /usuarios/{user_id}
     def get(self, user_id):
         usuario = UsuarioModel.find_user(user_id)
         if usuario:

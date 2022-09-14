@@ -4,8 +4,6 @@ from resources.filtros import normalize_path_params, consulta_com_cidade, consul
 from flask_jwt_extended import jwt_required
 import sqlite3
 
-
-
 # path /hoteis?cidade=X&estrelas_min=4&diaria_max=400
 path_params = reqparse.RequestParser()
 path_params.add_argument('cidade', type=str)
@@ -26,13 +24,11 @@ class Hoteis(Resource):
         parametros = normalize_path_params(**dados_validos)
         
         if not parametros.get('cidade'):
-            consulta = consulta_sem_cidade
             tupla = tuple([parametros[chave] for chave in parametros])
-            resultado = cursor.execute(consulta, tupla)
+            resultado = cursor.execute(consulta_sem_cidade, tupla)
         else:
-            consulta = consulta_com_cidade
             tupla = tuple([parametros[chave] for chave in parametros])
-            resultado = cursor.execute(consulta, tupla)
+            resultado = cursor.execute(consulta_com_cidade, tupla)
 
         hoteis = []
         for linha in resultado:
@@ -41,7 +37,8 @@ class Hoteis(Resource):
                 'nome': linha[1],
                 'estrelas': linha[2],
                 'diaria': linha[3],
-                'cidade': linha[4]
+                'cidade': linha[4],
+                'site_id': linha[5]
                 })
             
         return {'hoteis': hoteis}
@@ -52,6 +49,7 @@ class Hotel(Resource):
     argumentos.add_argument('estrelas', type=float, required=True, help="THIS_FIELD_CANNOT_BE_NULL_OR_BLANK")
     argumentos.add_argument('diaria')
     argumentos.add_argument('cidade')
+    argumentos.add_argument('site_id')
     
     def get_all(self):
         hoteis = HotelModel.find_all()
