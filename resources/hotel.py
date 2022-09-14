@@ -1,5 +1,7 @@
+from importlib.metadata import requires
 from flask_restful import Resource, reqparse
 from models.hotel import HotelModel
+from models.site import SiteModel
 from resources.filtros import normalize_path_params, consulta_com_cidade, consulta_sem_cidade
 from flask_jwt_extended import jwt_required
 import sqlite3
@@ -49,7 +51,7 @@ class Hotel(Resource):
     argumentos.add_argument('estrelas', type=float, required=True, help="THIS_FIELD_CANNOT_BE_NULL_OR_BLANK")
     argumentos.add_argument('diaria')
     argumentos.add_argument('cidade')
-    argumentos.add_argument('site_id')
+    argumentos.add_argument('site_id', type=int, required=True, help="THE_HOTEL_NEEDS_TO_BE_LINKED_WITH_THE_SITE")
     
     def get_all(self):
         hoteis = HotelModel.find_all()
@@ -71,6 +73,9 @@ class Hotel(Resource):
         
         dados = Hotel.argumentos.parse_args()
         hotel = HotelModel(hotel_id, **dados)
+        
+        if not SiteModel.find_by_id(dados.get('site_id')):
+            return {'message': 'THE_HOTEL_MUST_BE_ASSOCIATED_TO_A_VALID_SITE_ID'}, 400
         try:
             hotel.save_hotel()
         except:
